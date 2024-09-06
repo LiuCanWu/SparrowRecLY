@@ -25,6 +25,11 @@ class Rating{
         this.timestamp = lines[3];
         this.latestMovieId = lines[1];
     }
+
+    @Override
+    public String toString() {
+        return this.userId + "," + this.movieId + "," + this.rating + "," + this.timestamp;
+    }
 }
 
 public class RealTimeFeature {
@@ -34,7 +39,7 @@ public class RealTimeFeature {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment
                 .getExecutionEnvironment();
 
-        URL ratingResourcesPath = this.getClass().getResource("/webroot/sampledata/ratings.csv");
+        URL ratingResourcesPath = this.getClass().getResource("/webroot/sampledata/realtimeRatings.csv");
 
         // monitor directory, checking for new files
         TextInputFormat format = new TextInputFormat(

@@ -72,6 +72,39 @@ public class RecForYouProcess {
      *    没有结果再用离线的结果作为替补进行实时推荐
      */
 
+    public static List<Movie> getRealRecList(int userId, int size, String model){
+        User user = DataManager.getInstance().getUserById(userId);
+        if (null == user){
+            return new ArrayList<>();
+        }
+        final int CANDIDATE_SIZE = 800;
+        // 猜你喜欢的召回，根据电影的评分高低，从全量中召回评分前800的
+//        List<Movie> candidates = DataManager.getInstance().getMovies(CANDIDATE_SIZE, "rating");
+
+        //load user emb from redis if data source is redis
+        //user 若在dataManager中没有通过file加载embedding，则在这里线上的方式从redis中加载embedding
+//        if (Config.EMB_DATA_SOURCE.equals(Config.DATA_SOURCE_REDIS)){
+//            String userEmbKey = "uEmb:" + userId;
+//            String userEmb = RedisClient.getInstance().get(userEmbKey);
+//            if (null != userEmb){
+//                user.setEmb(Utility.parseEmbStr(userEmb));
+//            }
+//        }
+        String redisKey = "real_user_record:" + userId;
+        String movieId = RedisClient.getInstance().get(redisKey);
+        Movie movieById = DataManager.getInstance().getMovieById(Integer.parseInt(movieId));
+
+        List<Movie> rankedList = new ArrayList<>();
+        rankedList.add(movieById);
+
+//        List<Movie> rankedList = ranker(user, candidates, model);
+//
+//        if (rankedList.size() > size){
+//            return rankedList.subList(0, size);
+//        }
+        return rankedList;
+    }
+
 
 
 

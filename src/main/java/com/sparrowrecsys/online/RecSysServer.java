@@ -69,9 +69,8 @@ public class RecSysServer {
         context.addServlet(new ServletHolder(new RecommendationService()), "/getrecommendation");
         //猜你喜欢推荐(离线推荐)
         context.addServlet(new ServletHolder(new RecForYouService()), "/getrecforyou");
-
         //新增实时推荐接口
-        context.addServlet(new ServletHolder(new RecForYouService()), "/getrecforyourealtime");
+        context.addServlet(new ServletHolder(new RecForYouServiceRealTime()), "/getrecforyourealtime");
 
         //set url handler
         server.setHandler(context);

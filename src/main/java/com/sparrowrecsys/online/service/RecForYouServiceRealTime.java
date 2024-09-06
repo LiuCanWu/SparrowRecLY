@@ -40,7 +40,7 @@ public class RecForYouServiceRealTime extends HttpServlet{
 
             //a simple method, just fetch all the movie in the genre
             // 在RecForYouProcess中写一个实时推荐的接口
-            List<Movie> movies = RecForYouProcess.getRecList(Integer.parseInt(userId), Integer.parseInt(size), model);
+            List<Movie> movies = RecForYouProcess.getRealRecList(Integer.parseInt(userId), Integer.parseInt(size), model);
 
             //convert movie list to json format and return
             ObjectMapper mapper = new ObjectMapper();
