@@ -140,7 +140,7 @@ object FeatureEngForRecModel {
       .na.fill("")
 
     movieLatestSamples.printSchema()
-    movieLatestSamples.show(100, truncate = false)
+    movieLatestSamples.show(10, truncate = false)
 
     val movieFeaturePrefix = "mf:"
 
@@ -163,7 +163,10 @@ object FeatureEngForRecModel {
       valueMap("movieAvgRating") = sample.getAs[String]("movieAvgRating")
       valueMap("movieRatingStddev") = sample.getAs[String]("movieRatingStddev")
 
-      redisClient.hset(movieKey, JavaConversions.mapAsJavaMap(valueMap))
+//      redisClient.hset(movieKey, JavaConversions.mapAsJavaMap(valueMap))
+      valueMap.foreach { case (field, value) =>
+        redisClient.hset(movieKey, field, value)
+      }
       insertedMovieNumber += 1
       if (insertedMovieNumber % 100 ==0){
         println(insertedMovieNumber + "/" + movieCount + "...")
@@ -217,7 +220,7 @@ object FeatureEngForRecModel {
       .na.fill("")
 
     userLatestSamples.printSchema()
-    userLatestSamples.show(100, truncate = false)
+    userLatestSamples.show(10, truncate = false)
 
     val userFeaturePrefix = "uf:"
 
@@ -248,13 +251,16 @@ object FeatureEngForRecModel {
       valueMap("userAvgRating") = sample.getAs[String]("userAvgRating")
       valueMap("userRatingStddev") = sample.getAs[String]("userRatingStddev")
 
-      redisClient.hset(userKey, JavaConversions.mapAsJavaMap(valueMap))
+//      redisClient.hset(userKey, JavaConversions.mapAsJavaMap(valueMap))
+      valueMap.foreach { case (field, value) =>
+        redisClient.hset(userKey, field, value)
+      }
       insertedUserNumber += 1
       if (insertedUserNumber % 100 ==0){
         println(insertedUserNumber + "/" + userCount + "...")
       }
     }
-
+    redisClient.set("sparrowWrite:", "Done!!")
     redisClient.close()
     userLatestSamples
   }
@@ -268,27 +274,37 @@ object FeatureEngForRecModel {
       .set("spark.submit.deployMode", "client")
 
     val spark = SparkSession.builder.config(conf).getOrCreate()
-    val movieResourcesPath = this.getClass.getResource("/webroot/sampledatanew/movies.csv")
-    val movieSamples = spark.read.format("csv").option("header", "true").load(movieResourcesPath.getPath)
-
-    val ratingsResourcesPath = this.getClass.getResource("/webroot/sampledatanew/ratings.csv")
-    val ratingSamples = spark.read.format("csv").option("header", "true").load(ratingsResourcesPath.getPath)
-
-    val ratingSamplesWithLabel = addSampleLabel(ratingSamples)
-    ratingSamplesWithLabel.show(10, truncate = false)
-
-    val samplesWithMovieFeatures = addMovieFeatures(movieSamples, ratingSamplesWithLabel)
-    val samplesWithUserFeatures = addUserFeatures(samplesWithMovieFeatures)
-
-
-    //save samples as csv format
-    splitAndSaveTrainingTestSamples(samplesWithUserFeatures, "/webroot/sampledatanew")
+//    val movieResourcesPath = this.getClass.getResource("/webroot/sampledata/movies.csv")
+//    val movieSamples = spark.read.format("csv").option("header", "true").load(movieResourcesPath.getPath)
+//
+//    val ratingsResourcesPath = this.getClass.getResource("/webroot/sampledata/ratings.csv")
+//    val ratingSamples = spark.read.format("csv").option("header", "true").load(ratingsResourcesPath.getPath)
+//
+//    val ratingSamplesWithLabel = addSampleLabel(ratingSamples)
+//    ratingSamplesWithLabel.show(10, truncate = false)
+//
+//    val samplesWithMovieFeatures = addMovieFeatures(movieSamples, ratingSamplesWithLabel)
+//    val samplesWithUserFeatures = addUserFeatures(samplesWithMovieFeatures)
+//
+//
+//    //save samples as csv format
+//    splitAndSaveTrainingTestSamples(samplesWithUserFeatures, "/webroot/sampledatanew")
 
     //save user features and item features to redis for online inference
 //     当前这两部分的特征还没有存储到redis
-    extractAndSaveUserFeaturesToRedis(samplesWithUserFeatures)
-    extractAndSaveMovieFeaturesToRedis(samplesWithUserFeatures)
+
+
+    val testSamplesPath = this.getClass.getResource("/webroot/sampledata/testSamples.csv")
+//    val trainingSamplesPath = this.getClass.getResource("/webroot/sampledata/trainingSamples.csv")
+
+    val testSamples = spark.read.format("csv").option("header", "true").load(testSamplesPath.getPath)
+    testSamples.show(10)
+
+    println("===》 开始存储特征到redis")
+    extractAndSaveUserFeaturesToRedis(testSamples)
+    extractAndSaveMovieFeaturesToRedis(testSamples)
     spark.close()
+    println("===》 存储特征到redis完毕")
   }
 
 }

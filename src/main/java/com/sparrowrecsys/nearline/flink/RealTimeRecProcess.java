@@ -66,25 +66,29 @@ public class RealTimeRecProcess {
         DataStream<Rating> ratingStream = inputStream.map(Rating::new);
 
         ratingStream.keyBy(rating -> rating.userId)
-                .timeWindow(Time.seconds(1))
-                .reduce(
-                        (ReduceFunction<Rating>) (rating, t1) -> {
-                            if (rating.timestamp.compareTo(t1.timestamp) > 0){
-                                return rating;
-                            }else{
-                                return t1;
-                            }
-                        }
-                ).addSink(new SinkFunction<Rating>() {
+//                .timeWindow(Time.seconds(1))
+//                .reduce(
+//                        (ReduceFunction<Rating>) (rating, t1) -> {
+//                            if (rating.timestamp.compareTo(t1.timestamp) > 0){
+//                                return rating;
+//                            }else{
+//                                return t1;
+//                            }
+//                        }
+//                )
+                .addSink(new SinkFunction<Rating>() {
                     @Override
                     public void invoke(Rating value, Context context) {
                         Jedis jedis = null;
                         try {
                             jedis = new Jedis("localhost", 6379);
-                            String redisKey = "real_user_record:" + value.userId;
+                            String redisKey = "real_record:" + value.userId;
                             String redisValue = value.movieId;
-                            jedis.set(redisKey, redisValue);
+                            jedis.rpush(redisKey, redisValue);
+                            jedis.expire(redisKey, 300);
+//                            jedis.set(redisKey, redisValue);
                             System.out.println("real_user_record_userId:" + value.userId + "\tlatestMovieId:" + value.latestMovieId);
+                            System.out.println("===>当前用户" + value.userId + "的实时观影记录: " + jedis.lrange(redisKey, 0, -1));
                         } finally {
                             if (jedis != null) {
                                 jedis.close();

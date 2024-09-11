@@ -1,13 +1,14 @@
 import tensorflow as tf
 
 # Training samples path, change to your local path
-training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv",
-                                                     "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                     "/resources/webroot/sampledata/trainingSamples.csv")
-# Test samples path, change to your local path
-test_samples_file_path = tf.keras.utils.get_file("testSamples.csv",
-                                                 "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                 "/resources/webroot/sampledata/testSamples.csv")
+# training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv",
+#                                                      "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/trainingSamples.csv")
+# # Test samples path, change to your local path
+# test_samples_file_path = tf.keras.utils.get_file("testSamples.csv",
+#                                                  "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/testSamples.csv")
+
+test_samples_file_path = "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/testSamples.csv"
+training_samples_file_path = "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/trainingSamples.csv"
 
 
 # load sample as tf dataset
@@ -27,6 +28,7 @@ train_dataset = get_dataset(training_samples_file_path)
 test_dataset = get_dataset(test_samples_file_path)
 
 # movie id embedding feature
+# num_buckets: 表示该类别特征的可能值的数量
 movie_col = tf.feature_column.categorical_column_with_identity(key='movieId', num_buckets=1001)
 movie_emb_col = tf.feature_column.embedding_column(movie_col, 10)
 
@@ -83,9 +85,9 @@ model.compile(
 model.fit(train_dataset, epochs=5)
 
 # evaluate the model
-test_loss, test_accuracy, test_roc_auc, test_pr_auc = model.evaluate(test_dataset)
-print('\n\nTest Loss {}, Test Accuracy {}, Test ROC AUC {}, Test PR AUC {}'.format(test_loss, test_accuracy,
-                                                                                   test_roc_auc, test_pr_auc))
+# test_loss, test_accuracy, test_roc_auc, test_pr_auc = model.evaluate(test_dataset)
+# print('\n\nTest Loss {}, Test Accuracy {}, Test ROC AUC {}, Test PR AUC {}'.format(test_loss, test_accuracy,
+                                                                                #    test_roc_auc, test_pr_auc))
 
 # print some predict results
 predictions = model.predict(test_dataset)
@@ -94,12 +96,12 @@ for prediction, goodRating in zip(predictions[:12], list(test_dataset)[0][1][:12
           " | Actual rating label: ",
           ("Good Rating" if bool(goodRating) else "Bad Rating"))
 
-tf.keras.models.save_model(
-    model,
-    "file:///Users/zhewang/Workspace/SparrowRecSys/src/main/resources/webroot/modeldata/neuralcf/002",
-    overwrite=True,
-    include_optimizer=True,
-    save_format=None,
-    signatures=None,
-    options=None
-)
+# tf.keras.models.save_model(
+#     model,
+#     "file:///Users/zhewang/Workspace/SparrowRecSys/src/main/resources/webroot/modeldata/neuralcf/002",
+#     overwrite=True,
+#     include_optimizer=True,
+#     save_format=None,
+#     signatures=None,
+#     options=None
+# )

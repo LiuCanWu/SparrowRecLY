@@ -1,10 +1,13 @@
 import tensorflow as tf
 
 # Training samples path, change to your local path
-training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv","E:///workspace/AI_rec/SparrowRecSys-master/src/main/resources/webroot/sampledata/trainingSamples.csv")
-# Test samples path, change to your local path
-test_samples_file_path = tf.keras.utils.get_file("testSamples.csv","E:\\workspace\\AI_rec\\SparrowRecSys-master\\src\\main\\resources\\webroot\\sampledata\\testSamples.csv")
+# training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv","E:///workspace/AI_rec/SparrowRecSys-master/src/main/resources/webroot/sampledata/trainingSamples.csv")
+# # Test samples path, change to your local path
+# test_samples_file_path = tf.keras.utils.get_file("testSamples.csv","E:\\workspace\\AI_rec\\SparrowRecSys-master\\src\\main\\resources\\webroot\\sampledata\\testSamples.csv")
 
+
+test_samples_file_path = "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/testSamples.csv"
+training_samples_file_path = "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/trainingSamples.csv"
 
 # load sample as tf dataset
 def get_dataset(file_path):
@@ -24,8 +27,7 @@ test_dataset = get_dataset(test_samples_file_path)
 
 # genre features vocabulary
 genre_vocab = ['Film-Noir', 'Action', 'Adventure', 'Horror', 'Romance', 'War', 'Comedy', 'Western', 'Documentary',
-               'Sci-Fi', 'Drama', 'Thriller',
-               'Crime', 'Fantasy', 'Animation', 'IMAX', 'Mystery', 'Children', 'Musical']
+               'Sci-Fi', 'Drama', 'Thriller','Crime', 'Fantasy', 'Animation', 'IMAX', 'Mystery', 'Children', 'Musical']
 
 GENRE_FEATURES = {
     'userGenre1': genre_vocab,
@@ -75,20 +77,31 @@ model = tf.keras.Sequential([
 # compile the model, set loss function, optimizer and evaluation metrics
 model.compile(
     loss='binary_crossentropy',
-    optimizer='adam',
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
     metrics=['accuracy', tf.keras.metrics.AUC(curve='ROC'), tf.keras.metrics.AUC(curve='PR')])
 
 # train the model
-model.fit(train_dataset, epochs=5)
+model.fit(train_dataset, epochs=2)
 
 # evaluate the model
 test_loss, test_accuracy, test_roc_auc, test_pr_auc = model.evaluate(test_dataset)
 print('\n\nTest Loss {}, Test Accuracy {}, Test ROC AUC {}, Test PR AUC {}'.format(test_loss, test_accuracy,
                                                                                    test_roc_auc, test_pr_auc))
-
 # print some predict results
-predictions = model.predict(test_dataset)
-for prediction, goodRating in zip(predictions[:12], list(test_dataset)[0][1][:12]):
-    print("Predicted good rating: {:.2%}".format(prediction[0]),
-          " | Actual rating label: ",
-          ("Good Rating" if bool(goodRating) else "Bad Rating"))
+# predictions = model.predict(test_dataset)
+# for prediction, goodRating in zip(predictions[:12], list(test_dataset)[0][1][:12]):
+#     print("Predicted good rating: {:.2%}".format(prediction[0]),
+#           " | Actual rating label: ",
+#           ("Good Rating" if bool(goodRating) else "Bad Rating"))
+
+
+tf.keras.models.save_model(
+    model,
+    "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/modeldata/EMLP/002",
+    overwrite=True,
+    include_optimizer=True,
+    save_format=None,
+    signatures=None,
+    options=None
+)
+print("=======>开始保存完毕")

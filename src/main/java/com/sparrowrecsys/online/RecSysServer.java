@@ -67,10 +67,13 @@ public class RecSysServer {
         //相似电影推荐
         context.addServlet(new ServletHolder(new SimilarMovieService()), "/getsimilarmovie");
         context.addServlet(new ServletHolder(new RecommendationService()), "/getrecommendation");
-        //猜你喜欢推荐(离线推荐)
+        //猜你喜欢推荐(离线推荐，embedding相似计算)
         context.addServlet(new ServletHolder(new RecForYouService()), "/getrecforyou");
+        //猜你喜欢推荐(neuralCF 模型推荐)
+        context.addServlet(new ServletHolder(new RecForYouService()), "/getrecforyouneuralcf");
         //新增实时推荐接口
         context.addServlet(new ServletHolder(new RecForYouServiceRealTime()), "/getrecforyourealtime");
+
 
         //set url handler
         server.setHandler(context);

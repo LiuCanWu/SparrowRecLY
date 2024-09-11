@@ -1,14 +1,17 @@
 import tensorflow as tf
 
 # Training samples path, change to your local path
-training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv",
-                                                     "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                     "/resources/webroot/sampledata/trainingSamples.csv")
-# Test samples path, change to your local path
-test_samples_file_path = tf.keras.utils.get_file("testSamples.csv",
-                                                 "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                 "/resources/webroot/sampledata/testSamples.csv")
+# training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv",
+#                                                      "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
+#                                                      "/resources/webroot/sampledata/trainingSamples.csv")
+# # Test samples path, change to your local path
+# test_samples_file_path = tf.keras.utils.get_file("testSamples.csv",
+#                                                  "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
+#                                                  "/resources/webroot/sampledata/testSamples.csv")
 
+
+test_samples_file_path = "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/testSamples.csv"
+training_samples_file_path = "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/trainingSamples.csv"
 
 # load sample as tf dataset
 def get_dataset(file_path):
@@ -113,6 +116,8 @@ concat_layer = tf.keras.layers.concatenate([fm_first_order_layer, product_layer_
 output_layer = tf.keras.layers.Dense(1, activation='sigmoid')(concat_layer)
 
 model = tf.keras.Model(inputs, output_layer)
+model.summary()
+
 # compile the model, set loss function, optimizer and evaluation metrics
 model.compile(
     loss='binary_crossentropy',
@@ -123,9 +128,9 @@ model.compile(
 model.fit(train_dataset, epochs=5)
 
 # evaluate the model
-test_loss, test_accuracy, test_roc_auc, test_pr_auc = model.evaluate(test_dataset)
-print('\n\nTest Loss {}, Test Accuracy {}, Test ROC AUC {}, Test PR AUC {}'.format(test_loss, test_accuracy,
-                                                                                   test_roc_auc, test_pr_auc))
+# test_loss, test_accuracy, test_roc_auc, test_pr_auc = model.evaluate(test_dataset)
+# print('\n\nTest Loss {}, Test Accuracy {}, Test ROC AUC {}, Test PR AUC {}'.format(test_loss, test_accuracy,
+                                                                                #    test_roc_auc, test_pr_auc))
 
 # print some predict results
 predictions = model.predict(test_dataset)

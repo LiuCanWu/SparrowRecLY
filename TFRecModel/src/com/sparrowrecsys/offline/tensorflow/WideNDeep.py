@@ -1,13 +1,15 @@
 import tensorflow as tf
 
 # Training samples path, change to your local path
-training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv",
-                                                     "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                     "/resources/webroot/sampledata/trainingSamples.csv")
-# Test samples path, change to your local path
-test_samples_file_path = tf.keras.utils.get_file("testSamples.csv",
-                                                 "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                 "/resources/webroot/sampledata/testSamples.csv")
+# training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv",
+#                                                      "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/trainingSamples.csv")
+# # Test samples path, change to your local path
+# test_samples_file_path = tf.keras.utils.get_file("testSamples.csv",
+                                                #  "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/testSamples.csv")
+
+
+test_samples_file_path = "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/testSamples.csv"
+training_samples_file_path = "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/sampledata/trainingSamples.csv"
 
 
 # load sample as tf dataset
@@ -107,6 +109,10 @@ both = tf.keras.layers.concatenate([deep, wide])
 output_layer = tf.keras.layers.Dense(1, activation='sigmoid')(both)
 model = tf.keras.Model(inputs, output_layer)
 
+print("==============>model")
+model.summary()
+model.output_shape
+
 # compile the model, set loss function, optimizer and evaluation metrics
 model.compile(
     loss='binary_crossentropy',
@@ -117,9 +123,9 @@ model.compile(
 model.fit(train_dataset, epochs=5)
 
 # evaluate the model
-test_loss, test_accuracy, test_roc_auc, test_pr_auc = model.evaluate(test_dataset)
-print('\n\nTest Loss {}, Test Accuracy {}, Test ROC AUC {}, Test PR AUC {}'.format(test_loss, test_accuracy,
-                                                                                   test_roc_auc, test_pr_auc))
+# test_loss, test_accuracy, test_roc_auc, test_pr_auc = model.evaluate(test_dataset)
+# print('\n\nTest Loss {}, Test Accuracy {}, Test ROC AUC {}, Test PR AUC {}'.format(test_loss, test_accuracy,
+                                                                                #    test_roc_auc, test_pr_auc))
 
 # print some predict results
 predictions = model.predict(test_dataset)
@@ -127,3 +133,15 @@ for prediction, goodRating in zip(predictions[:12], list(test_dataset)[0][1][:12
     print("Predicted good rating: {:.2%}".format(prediction[0]),
           " | Actual rating label: ",
           ("Good Rating" if bool(goodRating) else "Bad Rating"))
+
+
+# tf.keras.models.save_model(
+#     model,
+#     "E:///workspace/AI_rec/SparrowRecSys-ly/src/main/resources/webroot/modeldata/WideNDeep/001",
+#     overwrite=True,
+#     include_optimizer=True,
+#     save_format=None,
+#     signatures=None,
+#     options=None
+# )
+# print("=====>模型保存完毕")

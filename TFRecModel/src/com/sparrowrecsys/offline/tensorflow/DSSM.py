@@ -1,8 +1,6 @@
 import tensorflow as tf
 
 
-
-
 # 双塔模型定义
 # neural cf model arch one. embedding+MLP in each tower, then dot product layer as the output
 def neural_cf_model_2(feature_inputs, item_feature_columns, user_feature_columns, hidden_units):

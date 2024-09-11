@@ -53,6 +53,7 @@ public class RecForYouProcess {
             }
         }
 
+        // 精排使用embedding还是 neuralCF
         List<Movie> rankedList = ranker(user, candidates, model);
 
         if (rankedList.size() > size){
@@ -80,28 +81,23 @@ public class RecForYouProcess {
         final int CANDIDATE_SIZE = 800;
         // 猜你喜欢的召回，根据电影的评分高低，从全量中召回评分前800的
 //        List<Movie> candidates = DataManager.getInstance().getMovies(CANDIDATE_SIZE, "rating");
-
         //load user emb from redis if data source is redis
         //user 若在dataManager中没有通过file加载embedding，则在这里线上的方式从redis中加载embedding
-//        if (Config.EMB_DATA_SOURCE.equals(Config.DATA_SOURCE_REDIS)){
-//            String userEmbKey = "uEmb:" + userId;
-//            String userEmb = RedisClient.getInstance().get(userEmbKey);
-//            if (null != userEmb){
-//                user.setEmb(Utility.parseEmbStr(userEmb));
-//            }
-//        }
-        String redisKey = "real_user_record:" + userId;
-        String movieId = RedisClient.getInstance().get(redisKey);
-        Movie movieById = DataManager.getInstance().getMovieById(Integer.parseInt(movieId));
+        // 优化一下使用最近5个电影的平均的embedding作为用户的embedding，再做相似计算
 
+        String redisKey = "real_record:" + userId;
+//        String movieId = RedisClient.getInstance().get(redisKey);
+        List<String> recordMovies = RedisClient.getInstance().lrange(redisKey, 0, -1);
         List<Movie> rankedList = new ArrayList<>();
-        rankedList.add(movieById);
-
-//        List<Movie> rankedList = ranker(user, candidates, model);
-//
-//        if (rankedList.size() > size){
-//            return rankedList.subList(0, size);
-//        }
+        if (!recordMovies.isEmpty()) {
+            for (String movieId : recordMovies) {
+                Movie movieById = DataManager.getInstance().getMovieById(Integer.parseInt(movieId));
+                rankedList.add(movieById);
+            }
+        } else {
+            System.out.println("===========>当前用户的实时观影记录为空，使用离线的推荐结果");
+            return getRecList(userId, size, model);
+        }
         return rankedList;
     }
 
@@ -127,6 +123,8 @@ public class RecForYouProcess {
                 }
                 break;
             case "nerualcf":
+                // 应为nerualcf 输入的只有userID和movieID，若想实现实时推荐，需要根据实时数据对nerualcf进行实时训练
+                // 不训练模型，那就根据长短期兴趣进行分配
                 callNeuralCFTFServing(user, candidates, candidateScoreMap);
                 break;
             default:
@@ -179,6 +177,8 @@ public class RecForYouProcess {
         //need to confirm the tf serving end point
         String predictionScores = asyncSinglePostRequest("http://localhost:8501/v1/models/recmodel:predict", instancesRoot.toString());
         System.out.println("send user" + user.getUserId() + " request to tf serving.");
+        System.out.println(predictionScores);
+
 
         JSONObject predictionsObject = new JSONObject(predictionScores);
         JSONArray scores = predictionsObject.getJSONArray("predictions");

@@ -33,6 +33,7 @@ public class RecForYouService extends HttpServlet {
             String size = request.getParameter("size");
             //ranking algorithm
             String model = request.getParameter("model");
+            System.out.println("=========using model: " + model);
 
             if (Config.IS_ENABLE_AB_TEST){
                 model = ABTest.getConfigByUserId(userId);

@@ -84,7 +84,6 @@ public class HttpClient {
 
     public static void main(String[] args){
 
-
         //keys must be equal to:
         // movieAvgRating,
         // movieGenre1,movieGenre2,movieGenre3,
@@ -107,9 +106,6 @@ public class HttpClient {
         // userRatingStddev,
         // userReleaseYearStddev"
         //}
-        JSONObject instance = new JSONObject();
-        instance.put("userId",10351);
-        instance.put("movieId",52);
 
         /*
         instance.put("timestamp",1254725234);
@@ -141,23 +137,34 @@ public class HttpClient {
         instance.put("userReleaseYearStddev",0.53);
         instance.put("userAvgRating",3.86);
         instance.put("userRatingStddev",0.69);*/
-
+        JSONObject instance = new JSONObject();
+        instance.put("userId",10351);
+        instance.put("movieId",52);
 
         JSONObject instance2 = new JSONObject();
         instance2.put("userId",10351);
         instance2.put("movieId",53);
 
+        JSONObject instance3 = new JSONObject();
+        instance3.put("userId",10351);
+        instance3.put("movieId",54);
+//
         JSONArray instances = new JSONArray();
         instances.put(instance);
         instances.put(instance2);
-
+        instances.put(instance3);
+//
         JSONObject instancesRoot = new JSONObject();
         instancesRoot.put("instances", instances);
-
+//
         System.out.println(instancesRoot.toString());
 
+        System.out.println(asyncSinglePostRequest("http://localhost:8502/v1/models/recmodel:predict", instancesRoot.toString()));
 
 
-        System.out.println(asyncSinglePostRequest("http://localhost:8501/v1/models/recmodel:predict", instancesRoot.toString()));
+//        String host = "http://localhost:8501/v1/models/test-model:predict";
+//        String body = "{\"inputs\":[[0.5]]}";
+//        String response = asyncSinglePostRequest(host, body);
+//        System.out.println(response);
     }
 }
